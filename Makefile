@@ -17,3 +17,6 @@ su:	su.o util.o go.o auth.shadow.o
 
 %.o:	%.c
 	${CC} ${CFLAGS} -o $@ -c $>
+
+install: all
+	install -Dm 755 login ${DESTDIR}${BINDIR}
