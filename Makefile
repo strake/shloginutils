@@ -10,13 +10,13 @@ clean:
 	rm -f login su *.o
 
 login:	login.o util.o go.o auth.shadow.o
-	${CC} ${LDFLAGS} -o $@ $> -lcrypt
+	${CC} ${LDFLAGS} -o $@ $^ -lcrypt
 
 su:	su.o util.o go.o auth.shadow.o
-	${CC} ${LDFLAGS} -o $@ $> -lcrypt
+	${CC} ${LDFLAGS} -o $@ $^ -lcrypt
 
 %.o:	%.c
-	${CC} ${CFLAGS} -o $@ -c $>
+	${CC} ${CFLAGS} -o $@ -c $^
 
 install: all
 	install -Dm 755 login ${DESTDIR}${BINDIR}
