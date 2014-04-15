@@ -4,15 +4,18 @@ LDFLAGS += -static
 .SUFFIXES: .c .o
 .PHONY: all clean
 
-all:	login su
+all:	login su sudo
 
 clean:
-	rm -f login su *.o
+	rm -f login su sudo *.o
 
 login:	login.o go.o auth.shadow.o
 	${CC} ${LDFLAGS} -o $@ $^ -lcrypt
 
 su:	su.o go.o auth.shadow.o
+	${CC} ${LDFLAGS} -o $@ $^ -lcrypt
+
+sudo:	sudo.o go.o auth.shadow.o
 	${CC} ${LDFLAGS} -o $@ $^ -lcrypt
 
 %.o:	%.c
