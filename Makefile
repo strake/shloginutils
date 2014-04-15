@@ -9,10 +9,10 @@ all:	login su
 clean:
 	rm -f login su *.o
 
-login:	login.o util.o go.o auth.shadow.o
+login:	login.o go.o auth.shadow.o
 	${CC} ${LDFLAGS} -o $@ $^ -lcrypt
 
-su:	su.o util.o go.o auth.shadow.o
+su:	su.o go.o auth.shadow.o
 	${CC} ${LDFLAGS} -o $@ $^ -lcrypt
 
 %.o:	%.c

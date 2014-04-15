@@ -2,7 +2,6 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include "go.h"
-#include "util.h"
 
 extern char **environ;
 
@@ -16,10 +15,10 @@ void go (const char *name, int flags, char *argu[]) {
 	pid_t pid = 0;
 	
 	up = getpwnam (name);
-	if (!up) die (1, "%s:", selfname);
+	if (!up) err (1, "failed to getpwnam");
 	
-	if (setuid (up -> pw_uid) < 0) die (1, "%s:", selfname);
-	if (chdir  (up -> pw_dir) < 0) die (1, "%s:", selfname);
+	if (setuid (up -> pw_uid) < 0) err (1, "failed to setuid");
+	if (chdir  (up -> pw_dir) < 0) err (1, "failed to chdir home");
 
 	if (! (flags & GoKeepEnviron)) {
 		if (asprintf (&env[0],  "HOME=%s", up -> pw_dir)   < 0 ||
@@ -28,16 +27,16 @@ void go (const char *name, int flags, char *argu[]) {
 		    asprintf (&env[3],  "PATH=%s", up -> pw_uid == 0 ? "/sbin:/bin:/usr/sbin:/usr/bin" : "/usr/local/bin:/bin:/usr/bin:.") < 0 ||
 		    getenv ("TERM") ?
 		    asprintf (&env[4],  "TERM=%s", getenv ("TERM")) < 0 :
-		    (env[4] = 0)) die (1, "%s:", selfname);
+		    (env[4] = 0)) err (1, "failed to allocate memory");
 		env[5] = 0;
 	}
 	
 	if (flags & GoFork) pid = fork ();
-	if (pid < 0) die (1, "%s:", selfname);
+	if (pid < 0) err (1, "failed to fork");
 	if (pid > 0) exit (0);
 	
-	if (flags & GoSetSID) if (setsid () < 0) die (1, "%s:", selfname);
+	if (flags & GoSetSID) if (setsid () < 0) err (1, "failed to setsid");
 	
 	if (!argu) argu = (char * []){ up -> pw_shell, "-l", 0 };
-	if (execve (argu[0], argu, flags & GoKeepEnviron ? environ : env) < 0) die (1, "%s:", selfname);
+	if (execve (argu[0], argu, flags & GoKeepEnviron ? environ : env) < 0) err (1, "failed to exec");
 }
