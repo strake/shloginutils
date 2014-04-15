@@ -1,5 +1,7 @@
+#include <memory.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <err.h>
 #include "go.h"
 
 void main (int argc, char *argu[]) {
@@ -18,7 +20,7 @@ void main (int argc, char *argu[]) {
 	pass = getpass ("Password: ");
 	if (authorize (argu[ii], pass) == 0) {
 		memset (pass, 0, strlen (pass));
-		go (argu[ii], 0, 0);
+		go (argu[ii], GoChdirHome, 0);
 	}
 	fputs ("Denied\n", stdout);
 	errx (1, "authorization failed");

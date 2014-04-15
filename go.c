@@ -1,6 +1,9 @@
-#include <stdlib.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <err.h>
 #include "go.h"
 
 extern char **environ;
@@ -18,7 +21,8 @@ void go (const char *name, int flags, char *argu[]) {
 	if (!up) err (1, "failed to getpwnam");
 	
 	if (setuid (up -> pw_uid) < 0) err (1, "failed to setuid");
-	if (chdir  (up -> pw_dir) < 0) err (1, "failed to chdir home");
+	if (flags & GoChdirHome &&
+	    chdir  (up -> pw_dir) < 0) err (1, "failed to chdir home");
 
 	if (! (flags & GoKeepEnviron)) {
 		if (asprintf (&env[0],  "HOME=%s", up -> pw_dir)   < 0 ||
@@ -38,5 +42,5 @@ void go (const char *name, int flags, char *argu[]) {
 	if (flags & GoSetSID) if (setsid () < 0) err (1, "failed to setsid");
 	
 	if (!argu) argu = (char * []){ up -> pw_shell, "-l", 0 };
-	if (execve (argu[0], argu, flags & GoKeepEnviron ? environ : env) < 0) err (1, "failed to exec");
+	if ((flags & GoSearchPath ? execvpe : execve) (argu[0], argu, flags & GoKeepEnviron ? environ : env) < 0) err (1, "failed to exec");
 }
